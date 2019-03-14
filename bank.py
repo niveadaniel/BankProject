@@ -22,7 +22,7 @@ class Account(object):
     def __init__(self, branch_code, number_account, amount, person):
         self.branch_code = branch_code
         self.number_account = number_account
-        self.amount = amount
+        self.amount = float(amount)
         self.person = person.name
 
     def show_balance(self):
