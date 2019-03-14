@@ -53,8 +53,8 @@ nivea_account = Account('17', '15', 3000, nivea)
 daniel_account = Account('123', '35', 4000, daniel)
 accounts_list = [nivea_account, daniel_account]
 option = None
-account_found = False
 while True:
+    account_found = False
     x = input(('Olá, digite 1 para entrar em sua conta, ou digite 2 para abrir uma conta: '))
     if x == '1':
         account = find_account()
