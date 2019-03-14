@@ -53,15 +53,17 @@ nivea_account = Account('17', '15', 3000, nivea)
 daniel_account = Account('123', '35', 4000, daniel)
 accounts_list = [nivea_account, daniel_account]
 option = None
+account_found = False
 while True:
     x = input(('Olá, digite 1 para entrar em sua conta, ou digite 2 para abrir uma conta: '))
     if x == '1':
         account = find_account()
         if account is None:
             print('Essa conta não existe')
-            exit()
-        print('bem vindo,', account.person)
-        while True:
+        else:
+            account_found = True
+            print('bem vindo,', account.person)
+        while account_found == True:
             print('1- Show balance\n2- Cash ou\n3- Deposit\n4- Transfer cash\n5- Log out\n6- Close')
             option = input('Escolha uma das opções acima: ')
             if option == '1':
