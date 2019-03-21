@@ -47,7 +47,8 @@ insert into addresses (user_id, street, number, city, country) values
 select
 	users.name, addresses.street, accounts.amount
 from
-	'users
-	'left join addresses on addresses.user_id = users.id
-	'left join accounts on accounts.user_id = users.id;
+	users
+	left join addresses on addresses.user_id = users.id
+	left join accounts on accounts.user_id = users.id;
 	
+
