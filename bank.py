@@ -163,7 +163,9 @@ while True:
                 transfer_value = float(input('Valor para transferência: '))
                 if transfer_value < account.amount and transfer_value > 0:
                     print('Conta para receber: ')
-                    y = find_account()
+                    branch_code = input('Branch code: ')
+                    number_account = input('Number account: ')
+                    y = Account.find_account(branch_code, number_account)
                     if y is None:
                         print('Essa conta não existe')
                         break
