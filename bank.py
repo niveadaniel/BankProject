@@ -2,15 +2,8 @@ import random
 import sqlite3
 
 conn = sqlite3.connect('banktables.db')
+conn.row_factory = sqlite3.Row
 c = conn.cursor()
-
-def find_account():
-    branch_code = input('Branch code: ')
-    number_account = input('Number account: ')
-    for account in accounts_list:
-        if account.branch_code == branch_code and account.number_account == number_account:
-            return account
-
 
 class Address(object):
 
@@ -46,12 +39,6 @@ class Address(object):
             self.id = c.lastrowid
             conn.commit()
 
-    @staticmethod
-    def find(id):
-        c.execute("select * from person where id = '%s'" % id)
-        r = c.fetchone()
-        person = Person(id=r.id, name=r.name, age=r.age)
-        return person
 
 class Account(object):
 
@@ -99,11 +86,18 @@ class Account(object):
             conn.commit()
 
     @staticmethod
-    def find(id):
-        c.execute("select * from person where id = '%s'" % id)
+    def find_account(branch_code, number_account):
+        c.execute("select * from accounts where branch_code = '%s' and number_account = '%s'" % (branch_code, number_account))
         r = c.fetchone()
-        person = Person(id=r.id, name=r.name, age=r.age)
-        return person
+        account = Account(user_id=r['user_id'], branch_code=r['branch_code'], number_account=r['number_account'], amount=r['amount'])
+        return account
+
+    @staticmethod
+    def find_name(user_id):
+        c.execute("select * from person where id = '%s'" % user_id)
+        name_row = c.fetchone()
+        name = name_row['name']
+        return name
 
 
 class Person(object):
@@ -132,31 +126,28 @@ class Person(object):
             self.id = c.lastrowid
             conn.commit()
 
+    @staticmethod
+    def find(id):
+        c.execute("select * from person where id = '%s'" % id)
+        r = c.fetchone()
+        person = Person(id=r.id, name=r.name, age=r.age)
+        return person
+
 Person.create_table()
 Account.create_table()
-#nivea = Person('Nivea', 21)
-#nivea.save()
-#daniel = Person('Daniel', 38)
-#daniel.save()
-#nivea_account = Account(1, '17', '15', 3000)
-#nivea_account.save()
-#daniel_account = Account(2, '34', '12', 5700)
-#daniel_account.save()
-c.execute('select * from person')
-rows = c.fetchall()
-print(rows)
-#accounts_list = [nivea_account, daniel_account]
 option = None
 while True:
     account_found = False
     x = input(('Olá, digite 1 para entrar em sua conta, ou digite 2 para abrir uma conta: '))
     if x == '1':
-        account = find_account()
+        branch_code = input('Branch code: ')
+        number_account = input('Number account: ')
+        account = Account.find_account(branch_code, number_account)
         if account is None:
             print('Essa conta não existe')
         else:
             account_found = True
-            print('bem vindo,', account.person)
+            print('bem vindo,', Account.find_name(account.user_id))
         while account_found == True:
             print('1- Show balance\n2- Cash ou\n3- Deposit\n4- Transfer cash\n5- Log out\n6- Close')
             option = input('Escolha uma das opções acima: ')
@@ -189,7 +180,6 @@ while True:
          new_account = Account(user_id=new_person.id, branch_code=str(random.randint(0,100)),
                                number_account=str(random.randint(0,100)), amount=input('Inicial amount: '))
          new_account.save()
-         #accounts_list.append(new_account)
          print('New branch code: ', new_account.branch_code, '\nNew number account: ', new_account.number_account)
 
 
