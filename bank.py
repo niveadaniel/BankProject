@@ -1,4 +1,8 @@
 import random
+import sqlite3
+
+conn = sqlite3.connect('banktables.db')
+c = conn.cursor()
 
 def find_account():
     branch_code = input('Branch code: ')
@@ -10,20 +14,53 @@ def find_account():
 
 class Address(object):
 
-    def __init__(self, street, number, city, country):
+    def __init__(self, user_id, street, number, city, country, id = None):
+        self.id = int(id)
         self.street = street
         self.number = number
         self.city = city
         self.country = country
+        self.user_id = int(user_id)
 
+    @staticmethod
+    def create_table():
+        c.execute('''create table if not exists address (
+                        id integer primary key autoincrement not null,
+                        user_id integer not null,
+                        street text not null,
+                        number integer not null,
+                        city text not null,
+                        country text not null,
+                        foreign key (person_id) references person(id)''')
+        conn.commit()
+
+    def save(self):
+        if self.id != None:
+            c.execute(''' update address set 
+                        street=?, number=?, city=?, country=? where
+                        id=? ''', (self.street, self.number, self.city, self.country, self.id))
+            conn.commit()
+        else:
+            c.execute('''insert into address (user_id, street, number, city, country) values
+                            (?, ?, ?, ?, ?)''', (self.user_id, self.street, self.number, self.city, self.country,))
+            self.id = c.lastrowid
+            conn.commit()
+
+    @staticmethod
+    def find(id):
+        c.execute("select * from person where id = '%s'" % id)
+        r = c.fetchone()
+        person = Person(id=r.id, name=r.name, age=r.age)
+        return person
 
 class Account(object):
 
-    def __init__(self, branch_code, number_account, amount, person):
+    def __init__(self, user_id, branch_code, number_account, amount, id = None):
+        self.id = id
         self.branch_code = branch_code
         self.number_account = number_account
         self.amount = float(amount)
-        self.person = person.name
+        self.user_id = int(user_id)
 
     def show_balance(self):
         print('balance: ', self.amount, '$', sep='')
@@ -40,18 +77,75 @@ class Account(object):
         self.amount -= transfer_value
         print(account.amount, self.amount)
 
+    @staticmethod
+    def create_table():
+        c.execute('''create table if not exists accounts ( 
+                        id integer primary key autoincrement not null,
+                        user_id integer not null, branch_code integer not null,
+                        number_account integer not null, amount numeric not null, 
+                        foreign key (person_id) references person(id))''')
+        conn.commit()
+
+    def save(self):
+        if self.id != None:
+            c.execute('''update accounts set 
+                        branch_code=?, number_account=?, amount=? where 
+                        id=? ''', (self.branch_code, self.number_account, self.amount, self.id))
+            conn.commit()
+        else:
+            c.execute('''insert into accounts (user_id, branch_code, number_account, amount) values 
+                            (?, ?, ?, ?)''',(self.user_id, self.branch_code, self.number_account, self.amount))
+            self.id = c.lastrowid
+            conn.commit()
+
+    @staticmethod
+    def find(id):
+        c.execute("select * from person where id = '%s'" % id)
+        r = c.fetchone()
+        person = Person(id=r.id, name=r.name, age=r.age)
+        return person
+
 
 class Person(object):
 
-    def __init__(self, name):
+    def __init__(self, name, age, id = None):
+        self.id = id
+        self.age = int(age)
         self.name = name
 
+    @staticmethod
+    def create_table():
+        c.execute('''create table if not exists person (
+                        id integer primary key autoincrement not null,
+                        name text not null,
+                        age integer not null)''')
+        conn.commit()
 
-nivea = Person('Nivea')
-daniel = Person('Daniel')
-nivea_account = Account('17', '15', 3000, nivea)
-daniel_account = Account('123', '35', 4000, daniel)
-accounts_list = [nivea_account, daniel_account]
+    def save(self):
+        if self.id != None:
+            c.execute('''update person set 
+                            name=?, age=? where 
+                            id=? ''', (self.name, self.age, self.id))
+        else:
+            conn.commit()
+            c.execute('insert into person (name, age) values (?, ?)', (self.name, self.age))
+            self.id = c.lastrowid
+            conn.commit()
+
+Person.create_table()
+Account.create_table()
+#nivea = Person('Nivea', 21)
+#nivea.save()
+#daniel = Person('Daniel', 38)
+#daniel.save()
+#nivea_account = Account(1, '17', '15', 3000)
+#nivea_account.save()
+#daniel_account = Account(2, '34', '12', 5700)
+#daniel_account.save()
+c.execute('select * from person')
+rows = c.fetchall()
+print(rows)
+#accounts_list = [nivea_account, daniel_account]
 option = None
 while True:
     account_found = False
@@ -90,10 +184,12 @@ while True:
             if option == '6':
                 exit()
     if x == '2':
-         new_name = Person(input('Nome: '))
-         inicial_amount = input('Inicial amount: ')
-         new_account = Account(str(random.randint(0,100)), str(random.randint(0,100)), inicial_amount, new_name)
-         accounts_list.append(new_account)
+         new_person = Person(name=input('Nome: '), age=input('Idade: '))
+         new_person.save()
+         new_account = Account(user_id=new_person.id, branch_code=str(random.randint(0,100)),
+                               number_account=str(random.randint(0,100)), amount=input('Inicial amount: '))
+         new_account.save()
+         #accounts_list.append(new_account)
          print('New branch code: ', new_account.branch_code, '\nNew number account: ', new_account.number_account)
 
 
