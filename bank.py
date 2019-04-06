@@ -89,7 +89,8 @@ class Account(object):
     def find_account(branch_code, number_account):
         c.execute("select * from accounts where branch_code = '%s' and number_account = '%s'" % (branch_code, number_account))
         r = c.fetchone()
-        account = Account(user_id=r['user_id'], branch_code=r['branch_code'], number_account=r['number_account'], amount=r['amount'])
+        account = Account(user_id=r['user_id'], branch_code=r['branch_code'], number_account=r['number_account'],
+                          amount=r['amount'], id=r['id'])
         return account
 
     @staticmethod
@@ -172,6 +173,7 @@ while True:
                     account.transfer_cash(transfer_value, y)
                 else:
                     print('saldo inválido para transação')
+                y.save()
             if option == '5':
                 break
             if option == '6':
