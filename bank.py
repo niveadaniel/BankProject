@@ -24,7 +24,7 @@ class Address(object):
                         number integer not null,
                         city text not null,
                         country text not null,
-                        foreign key (person_id) references person(id)''')
+                        foreign key (user_id) references person(id)''')
         conn.commit()
 
     def save(self):
@@ -70,7 +70,7 @@ class Account(object):
                         id integer primary key autoincrement not null,
                         user_id integer not null, branch_code integer not null,
                         number_account integer not null, amount numeric not null, 
-                        foreign key (person_id) references person(id))''')
+                        foreign key (user_id) references person(id))''')
         conn.commit()
 
     def save(self):
@@ -176,6 +176,7 @@ while True:
                 break
             if option == '6':
                 exit()
+            account.save()
     if x == '2':
          new_person = Person(name=input('Nome: '), age=input('Idade: '))
          new_person.save()
